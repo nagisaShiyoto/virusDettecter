@@ -1,6 +1,10 @@
 #include "dettector.h"
-#define READ_BINARY_MODE "rb"
 #include <exception>
+
+#define READ_BINARY_MODE "rb"
+#define ELF_FILE_SIZE 4
+
+
 dettector::dettector(std::string VirusPath,std::string filePAth)
 /*
 get all the neccery data to start the test
@@ -9,18 +13,25 @@ filePath-the path to the folder you want to scan
 output:none
 */
 {
+    int start_place=0;
     FILE* virus=fopen(VirusPath.c_str(),READ_BINARY_MODE);
+    if(this->isElfFile(virus))
+    //in case the sig is a elf file
+    {
+        start_place=ELF_FILE_SIZE;
+    }
     this->file=opendir(filePAth.c_str());
     if(virus==NULL)
     {
         throw "coudn't open file";
     }
-    fseek(virus,0,SEEK_END);
+    fseek(virus,start_place,SEEK_END);
     this->virusSize=ftell(virus);//get the size
-    fseek(virus,0,SEEK_SET);
+    fseek(virus,start_place,SEEK_SET);
     this->virusInfo=this->getInfoFromFile(virus,this->virusSize);
     fclose(virus);
     this->filePath=filePAth;
+    this->virusSize=this->virusInfo.size();
 }
 
 std::vector<unsigned char> dettector::getInfoFromFile(FILE* file,int size)
@@ -104,11 +115,36 @@ output:a map with file name and if it was infected
         if(dp->d_type!=DT_DIR&&dp->d_name[0]!='.')//aliminate the files in the dir
         {
             currFile=fopen(this->createFilePath(dp).c_str(),READ_BINARY_MODE);
-            res[dp->d_name]=this->scanFile(currFile);
+            if(this->isElfFile(currFile))
+            {
+                res[dp->d_name]=this->scanFile(currFile);
+                if(res[dp->d_name])
+                {
+                    std::cout<<"File "<<this->createFilePath(dp)<<" is infected!"<<std::endl;
+                }
+            }
             fclose(currFile);
         }
     }
     return res;
+}
+
+bool dettector::isElfFile(FILE* file)
+/*
+check if file is an elf file
+input:file-to read the file
+output:true-elf file,false-other file type
+*/
+{
+    char elfSig[]={0x7f, 'E', 'L', 'F'};
+    std::vector<unsigned char> info=this->getInfoFromFile(file,ELF_FILE_SIZE);
+    fseek(file,ELF_FILE_SIZE,SEEK_SET);
+    if(info.size()==ELF_FILE_SIZE&&info[0]==0x7f&&info[1]=='E'
+    &&info[2]=='L'&&info[3]=='F')
+    {
+        return true;
+    }
+    return false;
 }
 
 dettector::~dettector()
