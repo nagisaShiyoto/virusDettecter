@@ -2,6 +2,12 @@
 #define READ_BINARY_MODE "rb"
 #include <exception>
 dettector::dettector(std::string VirusPath,std::string filePAth)
+/*
+get all the neccery data to start the test
+input:virusPath-the path of the virus sig,
+filePath-the path to the folder you want to scan
+output:none
+*/
 {
     FILE* virus=fopen(VirusPath.c_str(),READ_BINARY_MODE);
     this->file=opendir(filePAth.c_str());
@@ -17,6 +23,11 @@ dettector::dettector(std::string VirusPath,std::string filePAth)
 }
 
 std::vector<unsigned char> dettector::getInfoFromFile(FILE* file,int size)
+/*
+gets from file a chanck of info and returning to one byte after the start of the data collection
+input:file-the file to take data,size-the amount of data
+output: a chank of data from file
+*/
 {
     std::vector<unsigned char> infoFile;
     char curr=fgetc(file);
@@ -31,7 +42,10 @@ std::vector<unsigned char> dettector::getInfoFromFile(FILE* file,int size)
 }
 
 
+
+
+
 dettector::~dettector()
 {
-
+    closedir(this->file);
 }
