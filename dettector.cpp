@@ -41,7 +41,26 @@ output: a chank of data from file
     return infoFile;
 }
 
-
+bool dettector::compareSig(std::vector<unsigned char> info1)
+/*
+compare chank of data to the virus sig
+innput:info1-the chank of data to compare to
+output:true-identical,false-diffrant
+*/
+{
+    if(info1.size()==this->virusInfo.size())
+    {
+        for(int i=0;i<info1.size();i++)
+        {
+            if(this->virusInfo[i]!=info1[i])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
 
 
 

@@ -20,7 +20,8 @@ private:
     int virusSize;
 
     std::vector<unsigned char> getInfoFromFile(FILE* file,int size);
-    bool compareInfos(std::vector<char> info1,std::vector<char> info2);
+public:
+    bool compareSig(std::vector<unsigned char> info1);
 };
 
 #endif
