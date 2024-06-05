@@ -1,7 +1,6 @@
 #include <iostream>
 #include "dettector.cpp"
 
-
 int main(int argc, char** argv)
 {
     std::string VirusPath="";
@@ -13,11 +12,26 @@ int main(int argc, char** argv)
     }
     else
     {
+        std::cout<<"enter virus path:"<<std::endl;
         std::cin>>VirusPath;
+        std::cout<<"enter diractory path:"<<std::endl;
         std::cin>>filePath;
     }
-    dettector dect(VirusPath,filePath);
-    std::cout<<"scanning started..."<<std::endl;
-    std::map<std::string,bool> res=dect.scanFolder();
+
+
+    try
+    {
+        dettector dect(VirusPath,filePath);
+        std::cout<<"scanning started..."<<std::endl;
+        std::map<std::string,bool> res=dect.scanFolder();
+    }
+    catch(std::string e)
+    {
+        std::cerr << e << '\n';
+        return -1;
+    }
+    
+    
+    
     return 0;
 }

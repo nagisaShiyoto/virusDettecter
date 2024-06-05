@@ -15,15 +15,15 @@ output:none
 {
     int start_place=0;
     FILE* virus=fopen(VirusPath.c_str(),READ_BINARY_MODE);
+    this->file=opendir(filePAth.c_str());
+    if(virus==NULL||this->file==NULL)
+    {
+        throw std::string("coudn't open on of the path you wrote, try a difrant ones:)\n");
+    }
     if(this->isElfFile(virus))
     //in case the sig is a elf file
     {
         start_place=ELF_FILE_SIZE;
-    }
-    this->file=opendir(filePAth.c_str());
-    if(virus==NULL)
-    {
-        throw "coudn't open file";
     }
     fseek(virus,start_place,SEEK_END);
     this->virusSize=ftell(virus);//get the size
@@ -115,15 +115,22 @@ output:a map with file name and if it was infected
         if(dp->d_type!=DT_DIR&&dp->d_name[0]!='.')//aliminate the files in the dir
         {
             currFile=fopen(this->createFilePath(dp).c_str(),READ_BINARY_MODE);
-            if(this->isElfFile(currFile))
+            if(currFile!=NULL)
             {
-                res[dp->d_name]=this->scanFile(currFile);
-                if(res[dp->d_name])
+                if(this->isElfFile(currFile))
                 {
-                    std::cout<<"File "<<this->createFilePath(dp)<<" is infected!"<<std::endl;
+                    res[dp->d_name]=this->scanFile(currFile);
+                    if(res[dp->d_name])
+                    {
+                        std::cout<<"File "<<this->createFilePath(dp)<<" is infected!"<<std::endl;
+                    }
                 }
+                fclose(currFile);
             }
-            fclose(currFile);
+            else
+            {
+                std::cout<<"coudnt open file: "<<this->createFilePath(dp);
+            }
         }
     }
     return res;
