@@ -14,7 +14,7 @@ int main()
     //std::cin>>VirusPath;
     //std::cin>>filePAth;
 
-    dettector dect("../scanFile/scan1","../scanFile");
-    (dect.compareSig(hi)) ? std::cout<<"work":std::cout<<"not";
+    dettector dect("../scanFile/virusSig","../scanFile");
+    std::map<std::string,bool> res=dect.scanFolder();
     return 0;
 }

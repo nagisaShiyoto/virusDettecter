@@ -20,6 +20,7 @@ output:none
     fseek(virus,0,SEEK_SET);
     this->virusInfo=this->getInfoFromFile(virus,this->virusSize);
     fclose(virus);
+    this->filePath=filePAth;
 }
 
 std::vector<unsigned char> dettector::getInfoFromFile(FILE* file,int size)
@@ -62,7 +63,53 @@ output:true-identical,false-diffrant
     return false;
 }
 
+std::string dettector::createFilePath(struct dirent* pb)
+/*create the path to the file from the dir
+input:pb-the data on every file
+output:c_arr of the file path*/
+{
+    std::string path=this->filePath+"/"+pb->d_name;
+    return path;
+}
 
+bool dettector::scanFile(FILE* file)
+/*scan for virus sig in file(if the file is infacted)
+input:file to check
+output:true-infactes(has sig),false-not infacted*/
+{
+    std::vector<unsigned char> info=this->getInfoFromFile(file,this->virusSize);
+    while(info.size()==this->virusSize)
+    {
+        if(this->compareSig(info))
+        {
+            return true;
+        }
+        info=this->getInfoFromFile(file,this->virusSize);
+    }
+    return false;
+}
+
+std::map<std::string,bool> dettector::scanFolder()
+/*
+run over on all the files in folder to check for infacted files
+input:none
+output:a map with file name and if it was infected
+*/
+{
+    std::map<std::string,bool> res;
+    struct dirent* dp=nullptr;
+    FILE* currFile=nullptr;
+    while((dp=readdir(this->file))!=nullptr)
+    {
+        if(dp->d_type!=DT_DIR&&dp->d_name[0]!='.')//aliminate the files in the dir
+        {
+            currFile=fopen(this->createFilePath(dp).c_str(),READ_BINARY_MODE);
+            res[dp->d_name]=this->scanFile(currFile);
+            fclose(currFile);
+        }
+    }
+    return res;
+}
 
 dettector::~dettector()
 {
